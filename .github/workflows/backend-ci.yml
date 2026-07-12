@@ -48,18 +48,18 @@ jobs:
           echo "Updating image tag to $NEW_TAG inside infra-repo..."
           sed -i "s|image: $IMAGE_NAME:.*|image: $IMAGE_NAME:$NEW_TAG|g" $MANIFEST_PATH
 
-#      - name: Open Pull Request to MAIN in Infra Repo
-#        id: cpr
-#        uses: peter-evans/create-pull-request@v6
-#        with:
-#          token: ${{ secrets.PAT_TOKEN }}
-#          commit-message: "Update backend image to ${{ github.sha }}"
-#          branch: "auto-deploy/update-backend"
-#          base: "main" # PR to main branch in infra-repo
-#          title: "🚀 Auto-Deploy: Update backend to ${{ github.sha }}"
-#          body: "Automatically generated PR to update backend image tag. @YakirBar please review and approve."
-#          reviewers: "YakirBar" # Review request to YakirBar
-#
-#      - name: Show PR Info
-#        run: |
-#          echo "Pull Request successfully created: ${{ steps.cpr.outputs.pull-request-url }}"
+      - name: Open Pull Request to MAIN in Infra Repo
+        id: cpr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          commit-message: "Update backend image to ${{ github.sha }}"
+          branch: "auto-deploy/update-backend"
+          base: "main" # PR to main branch in infra-repo
+          title: "🚀 Auto-Deploy: Update backend to ${{ github.sha }}"
+          body: "Automatically generated PR to update backend image tag. @YakirBar please review and approve."
+          #reviewers: "YakirBar" # Review request to YakirBar
+
+      - name: Show PR Info
+        run: |
+          echo "Pull Request successfully created: ${{ steps.cpr.outputs.pull-request-url }}"
