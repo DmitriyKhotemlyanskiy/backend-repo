@@ -1,0 +1,65 @@
+name: "CI/CD-Backend-Pipeline"
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+#⚙️ Pipeline 1 – Build Pipeline
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Backend Code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/backend-app:${{ github.sha }}
+
+
+#⚙️ Pipeline 2 – Deployment Preparation Pipeline
+  prepare-deployment:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Infrastructure Repository
+        uses: actions/checkout@v4
+        with:
+          repository: 'DmitriyKhotemlyanskiy/infra-repo'
+          ref: 'dev'
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Update Backend Image Tag
+        run: |
+          NEW_TAG="${{ github.sha }}"
+          IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/backend-app"
+          MANIFEST_PATH="kubernetes/deployments/backend-deployment.yaml"
+          
+          echo "Updating image tag to $NEW_TAG inside infra-repo..."
+          sed -i "s|image: $IMAGE_NAME:.*|image: $IMAGE_NAME:$NEW_TAG|g" $MANIFEST_PATH
+
+      - name: Open Pull Request to MAIN in Infra Repo
+        id: cpr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          commit-message: "Update backend image to ${{ github.sha }}"
+          branch: "auto-deploy/update-backend"
+          base: "main" # PR to main branch in infra-repo
+          title: "🚀 Auto-Deploy: Update backend to ${{ github.sha }}"
+          body: "Automatically generated PR to update backend image tag. @YakirBar please review and approve."
+          #reviewers: "YakirBar" # Review request
+
+      - name: Show PR Info
+        run: |
+          echo "Pull Request successfully created: ${{ steps.cpr.outputs.pull-request-url }}"
