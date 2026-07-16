@@ -58,7 +58,7 @@ jobs:
           base: "main" # PR to main branch in infra-repo
           title: "🚀 Auto-Deploy: Update backend to ${{ github.sha }}"
           body: "Automatically generated PR to update backend image tag. @YakirBar please review and approve."
-          #reviewers: "YakirBar" # Review request to YakirBar
+          #reviewers: "YakirBar" # Review request
 
       - name: Show PR Info
         run: |
