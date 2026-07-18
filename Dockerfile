@@ -32,4 +32,5 @@ ENV MONGO_URI=mongodb://localhost:27017
 
 EXPOSE 8085
 
+COPY --from=builder /app/server .
 CMD ["./server"]
