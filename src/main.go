@@ -9,13 +9,11 @@ import (
 	"backend/internal/handler"
 
 	"github.com/gin-gonic/gin"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
 	// 1. Load configuration
 	cfg := config.LoadConfig()
-	http.Handle("/metrics", promhttp.Handler())
 
 	// 2. Connect to database
 	log.Printf("Connecting to MongoDB at %s...", cfg.MongoURI)
