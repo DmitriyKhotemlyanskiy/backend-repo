@@ -15,7 +15,6 @@ import (
 func main() {
 	// 1. Load configuration
 	cfg := config.LoadConfig()
-	http.Handle("/metrics", promhttp.Handler())
 
 	// 2. Connect to database
 	log.Printf("Connecting to MongoDB at %s...", cfg.MongoURI)
@@ -44,6 +43,9 @@ func main() {
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "UP"})
 	})
+
+	// Prometheus Metrics Endpoint
+	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	// Initialize handlers
 	h := handler.NewHandler(db)
